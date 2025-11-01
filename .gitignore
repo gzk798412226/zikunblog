@@ -29,3 +29,6 @@ Thumbs.db
 
 # 日志文件
 *.log
+
+# Local contributor guide
+AGENTS.md

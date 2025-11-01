@@ -8,7 +8,7 @@ googleAnalytics = "G-XXXXXXXXXX"  # 这里需要替换为你的GA4测量ID
 # 站点配置
 
 baseURL = "https://gzk798412226.github.io/"
-title = "铅笔与橡皮"
+title = "Zikun Guo's Blog | 铅笔与橡皮"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）
