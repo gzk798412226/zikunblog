@@ -1299,16 +1299,16 @@ uglyURLs = false
     iconAnimation = true
 
     # 是否显示站点的作者名称
-    displaySiteAuthorName = true
+    displaySiteAuthorName = false
 
     # 是否显示 Hugo 和 MemE 的链接
-    displayPoweredBy = true
+    displayPoweredBy = false
 
     # 是否显示站点的版权信息
     displaySiteCopyright = true
 
     # 自定义页脚（支持 Markdown）
-    customFooter = ""
+    customFooter = """本站为个人网站，内容仅代表作者个人观点，不代表任何机构立场。<br> 本站使用 Cloudflare 全球网络提供服务，内容可能在多个国家/地区的边缘节点缓存与传输，通常不位于中国大陆境内.访问与使用本站须遵守您所在地适用法律；在处理中国境内自然人个人信息或面向中国大陆提供服务的情形下，相关中国法律可能仍适用。"""
 
     displayBusuanziSiteUVAndPV = false
     busuanziSiteUVText = "本站访客数"
