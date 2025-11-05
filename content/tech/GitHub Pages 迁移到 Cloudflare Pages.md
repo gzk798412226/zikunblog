@@ -14,7 +14,7 @@ tags: ["技术"]
 
 ## 背景与目标
 
-* 原站点：`gzk798412226.github.io`（GitHub Pages）
+* 原站点：`zikunblog.pages.dev`（GitHub Pages）
 * 新目标：使用 **Cloudflare Pages** 自动构建与部署（获得更快的全球 CDN 与灵活配置）
 * 框架：**Hugo**（仓库包含主题子模块 `themes/meme`）
 
