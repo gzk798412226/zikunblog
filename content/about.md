@@ -11,7 +11,7 @@ draft: false
 
 本站使用[Github](https://github.com/)持续更新，使用[hugo](https://gohugo.io/)搭建，部署在[GitHub Pages](https://docs.github.com/en/pages)上，
 主题为[MemE](https://github.com/reuixiy/hugo-theme-meme.git)，
-秉承着开源精神，[源码在Github](https://github.com/gzk798412226/gzk798412226.github.io.git)。
+秉承着互联网的开源精神，[点击这里可以访问本站源码](https://github.com/gzk798412226/gzk798412226.github.io.git)。
 如果您发现了网站的任何错误、bug、亦或有任何意见建议的话，欢迎联系：gzk798412226@gmail.com 或直接
 [点击这里提交issues](https://github.com/gzk798412226/gzk798412226.github.io/issues)。
 
