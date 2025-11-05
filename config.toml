@@ -7,7 +7,7 @@ googleAnalytics = "G-XXXXXXXXXX"  # 这里需要替换为你的GA4测量ID
 ##########################################
 # 站点配置
 
-baseURL = "https://gzk798412226.github.io/"
+baseURL = "https://zikunblog.pages.dev/"
 title = "Zikun Blog"
 languageCode = "zh-CN"
 hasCJKLanguage = true
@@ -1490,7 +1490,7 @@ uglyURLs = false
         # 头像
         avatar = "/icons/apple-touch-icon.png"
         # 网站（默认值：baseURL）
-        website = "https://gzk798412226.github.io/"
+        website = "https://zikunblog.pages.dev/"
         # 推特
         twitter = ""
         # Fediverse
