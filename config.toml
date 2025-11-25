@@ -8,7 +8,7 @@ googleAnalytics = "G-XXXXXXXXXX"  # 这里需要替换为你的GA4测量ID
 # 站点配置
 
 baseURL = "https://zikunblog.pages.dev/"
-title = "Zikun Blog"
+title = "Blog"
 languageCode = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）

@@ -1,4 +1,4 @@
-// Reactive Dark Mode with Three-Mode Support (Light → Dark → System)
+// Reactive Dark Mode with Two-Mode Support (Light ↔ Dark)
 // https://web.dev/prefers-color-scheme/#reacting-on-dark-mode-changes (old reference)
 // https://twitter.com/ChromeDevTools/status/1197175265643745282 (old reference)
 
@@ -18,21 +18,14 @@ function isThemeSwitchingAllowed() {
 }
 
 // Initialize theme based on user preference or site configuration
-let userPreference;
-if (shouldOverrideSystemPreferences()) {
-    // When overrideSystemPreferences is enabled, use defaultTheme and ignore localStorage and system preferences
-    userPreference = defaultTheme;
-} else {
-    userPreference = localStorage.getItem('theme') || 'system';
-}
-applyThemeFromPreference(userPreference);
+const storedPreference = getStoredPreference();
+applyTheme(storedPreference);
 
-// Listen for system preference changes
+// Listen for system preference changes when no user choice is stored
 const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 mediaQuery.addEventListener('change', () => {
-    // Only apply system changes if user preference is 'system' and overrideSystemPreferences is not enabled
-    if (getUserPreference() === 'system' && isThemeSwitchingAllowed()) {
-        applyThemeFromPreference('system');
+    if (isThemeSwitchingAllowed() && !getStoredPreference()) {
+        applyTheme(null);
         changeMode();
     }
 });
@@ -41,10 +34,10 @@ window.addEventListener("DOMContentLoaded", () => {
     // Update meta tags and code highlighting
     changeMode();
     
-    // Set initial icon based on user preference
-    updateThemeIcons(getUserPreference());
+    // Set initial icon based on the applied theme
+    updateThemeIcons(getCurrentTheme());
 
-    // Theme Switcher with three-mode support (new implementation)
+    // Theme Switcher with two-mode support (light ↔ dark)
     // https://derekkedziora.com/blog/dark-mode (old reference)
     const themeSwitcher = document.getElementById('theme-switcher');
 
@@ -53,7 +46,7 @@ window.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             // Don't allow theme cycling if overrideSystemPreferences is enabled
             if (isThemeSwitchingAllowed()) {
-                cycleTheme();
+                toggleTheme();
                 changeMode();
             }
         });
@@ -63,24 +56,31 @@ window.addEventListener("DOMContentLoaded", () => {
 // Sync Across Tabs
 // https://codepen.io/tevko/pen/GgWYpg (old reference)
 window.addEventListener('storage', function (event) {
-    if (event.key !== 'theme') {
+    if (event.key !== 'theme' || !isThemeSwitchingAllowed()) {
         return;
     }
     
-    // Don't sync if overrideSystemPreferences is enabled
-    if (isThemeSwitchingAllowed()) {
-        applyThemeFromPreference(event.newValue || 'system');
-        changeMode();
-    }
+    applyTheme(getStoredPreference());
+    changeMode();
 });
 
 // Functions
 
-function getUserPreference() {
+function getStoredPreference() {
     if (shouldOverrideSystemPreferences()) {
         return defaultTheme;
     }
-    return localStorage.getItem('theme') || 'system';
+
+    const preference = localStorage.getItem('theme');
+    if (preference === 'light' || preference === 'dark') {
+        return preference;
+    }
+
+    if (preference === 'system') {
+        localStorage.removeItem('theme');
+    }
+
+    return null;
 }
 
 function getSystemPreference() {
@@ -91,63 +91,32 @@ function getCurrentTheme() {
     return document.documentElement.getAttribute('data-theme') || getSystemPreference();
 }
 
-function applyThemeFromPreference(preference) {
-    let actualTheme;
-    
+function resolveTheme(preference) {
     if (shouldOverrideSystemPreferences()) {
-        // When overrideSystemPreferences is enabled, always use defaultTheme
-        actualTheme = defaultTheme;
-    } else if (preference === 'system') {
-        actualTheme = getSystemPreference();
-    } else {
-        actualTheme = preference;
+        return defaultTheme;
     }
-    
-    changeModeMeta(actualTheme);
-    updateThemeIcons(preference);
+
+    return preference || getSystemPreference();
 }
 
-function cycleTheme() {
-    // Don't allow cycling if overrideSystemPreferences is enabled
-    if (!isThemeSwitchingAllowed()) {
-        return;
-    }
-    
-    const currentPreference = getUserPreference();
-    let newPreference;
-    
-    // Cycle: light → dark → system → light...
-    switch (currentPreference) {
-        case 'light':
-            newPreference = 'dark';
-            break;
-        case 'dark':
-            newPreference = 'system';
-            break;
-        case 'system':
-        default:
-            newPreference = 'light';
-            break;
-    }
-    
-    localStorage.setItem('theme', newPreference);
-    applyThemeFromPreference(newPreference);
+function applyTheme(preference) {
+    const theme = resolveTheme(preference);
+    changeModeMeta(theme);
+    updateThemeIcons(theme);
 }
 
-function updateThemeIcons(preference) {
+function toggleTheme() {
+    const nextPreference = getCurrentTheme() === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', nextPreference);
+    applyTheme(nextPreference);
+}
+
+function updateThemeIcons(theme) {
     // Hide all icons first
-    const icons = document.querySelectorAll('.theme-icon-light, .theme-icon-dark, .theme-icon-system');
+    const icons = document.querySelectorAll('.theme-icon-light, .theme-icon-dark');
     icons.forEach(icon => icon.style.display = 'none');
     
-    // Show the appropriate icon based on user preference (not actual theme)
-    let iconClass;
-    if (shouldOverrideSystemPreferences()) {
-        iconClass = `.theme-icon-${defaultTheme}`;
-    } else {
-        iconClass = `.theme-icon-${preference}`;
-    }
-    
-    const iconToShow = document.querySelector(iconClass);
+    const iconToShow = document.querySelector(`.theme-icon-${theme}`);
     if (iconToShow) {
         iconToShow.style.display = 'inline-block';
     }
