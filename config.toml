@@ -194,7 +194,7 @@ uglyURLs = false
     #     pre = "internal"
     #     post = "home"
     [[menu.main]]
-        url = "/games/super-mario/index.html"
+        url = "/games/mota/index.html"
         name = "Game"
         weight = 2
         pre = "internal"
