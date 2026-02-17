@@ -7,7 +7,6 @@ draft: false
 
 你好，我是Zikun，欢迎你来到我的网站。目前是庆北国立大学人工智能系的博士研究生，主要研究方向是VLM,Attention优化,演化学习。
 
-本站未设置主流节点索引，不会被 Google、百度、搜狗等主要搜索引擎收录。如果您对AI或对论文感兴趣的话，请[点击这里访问Google Scholar](https://scholar.google.com/citations?user=sew-SoEAAAAJ&hl=en)
 
 ![alt text](</images/ef679378024e11d26d4f5aeacf8e1813.jpg> )
 
