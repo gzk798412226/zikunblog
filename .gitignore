@@ -5,6 +5,14 @@
 /resources/_gen/
 .hugo_build.lock
 
+# Python虚拟环境
+.venv/
+__pycache__/
+*.pyc
+
+# JupyterLite临时文件
+.jupyterlite.doit.db
+
 # 依赖管理
 node_modules/
 npm-debug.log*
