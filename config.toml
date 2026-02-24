@@ -194,12 +194,6 @@ uglyURLs = false
     #     pre = "internal"
     #     post = "home"
     [[menu.main]]
-        url = "/jupyter/lab/index.html"
-        name = "Code"
-        weight = 1
-        pre = "internal"
-        post = "code"
-    [[menu.main]]
         url = "/games/mota/index.html"
         name = "Game"
         weight = 2
