@@ -5,10 +5,10 @@ draft: false
 ---
 
 
-你好，我是Zikun，欢迎你来到我的网站。目前是庆北国立大学人工智能系的博士研究生，主要研究方向是VLM,Attention优化,演化学习。
+你好，我是Zikun，欢迎你来到我的网站。我的主要研究方向是VLM,Attention优化,演化学习。同时正在同李媛媛老师在现实环境中进行一项长期的联合情感演化（Co-evolution）项目。
 
 
-![alt text](</images/ef679378024e11d26d4f5aeacf8e1813.jpg> )
+![alt text](</images/135e3ee8a67ff59fbbda1ff15746e5f5.jpg> )
 
 本站使用[Github](https://github.com/)持续更新，使用[hugo](https://gohugo.io/)搭建，部署在[GitHub Pages](https://docs.github.com/en/pages)上，
 主题为[MemE](https://github.com/reuixiy/hugo-theme-meme.git)，
