@@ -83,6 +83,12 @@ uglyURLs = false
             table = true
             taskList = true
             typographer = false
+            # 让 Goldmark 原样保留数学公式分隔符内的内容（保留反斜杠），交给 KaTeX 渲染
+            [markup.goldmark.extensions.passthrough]
+                enable = true
+                [markup.goldmark.extensions.passthrough.delimiters]
+                    block = [['$$', '$$'], ['\[', '\]']]
+                    inline = [['$', '$'], ['\(', '\)']]
         [markup.goldmark.parser]
             attribute = true
             autoHeadingID = true
