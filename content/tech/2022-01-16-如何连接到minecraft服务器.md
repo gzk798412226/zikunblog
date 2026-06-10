@@ -1,6 +1,7 @@
 ---
 title: "如何连接到minecraft服务器"
 date: 2022-01-16T12:59:51Z
+slug: "如何连接到minecraft服务器"
 draft: false
 categories: ["tech"]
 tags: ["技术"]

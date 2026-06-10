@@ -1,6 +1,7 @@
 ---
 title: "IDS-Extract:Downsizing Deep Learning Model For Question and Answering"
 date: 2022-12-23T22:11:35+09:00
+slug: "ids-extractdownsizing-deep-learning-model-for-question-and-answering"
 draft: false
 categories: ["tech"]
 tags: ["技术", "论文", "机器学习"]

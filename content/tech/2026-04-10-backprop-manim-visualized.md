@@ -1,6 +1,7 @@
 ---
 title: "用 Manim 把「反向传播」讲清楚：一支 8 章动画的诞生"
-date: 2026-06-10T15:00:00+09:00
+date: 2026-04-10T15:00:00+09:00
+slug: "backprop-manim-visualized"
 draft: false
 categories: ["tech"]
 tags: ["Manim", "反向传播", "深度学习", "可视化", "教学"]

@@ -1,6 +1,7 @@
 ---
 title: "使用Cloudflare搭建个人静态网站"
 date: 2023-04-23T20:37:02+09:00
+slug: "使用cloudflare搭建个人静态网站"
 draft: false
 categories: ["tech"]
 tags: ["技术", "Cloudflare", "静态网站", "部署"]

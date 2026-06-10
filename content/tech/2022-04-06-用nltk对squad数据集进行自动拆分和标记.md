@@ -1,6 +1,7 @@
 ---
 title: "用nltk对squad数据集进行自动拆分和标记"
 date: 2022-04-06T15:16:43+08:00
+slug: "用nltk对squad数据集进行自动拆分和标记"
 draft: false
 categories: ["tech"]
 tags: ["技术"]

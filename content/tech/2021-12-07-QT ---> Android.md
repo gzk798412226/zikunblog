@@ -1,6 +1,7 @@
 ---
 title: "QT ---> Android"
 date: 2021-12-07T13:17:32Z
+slug: "qt-----android"
 draft: false
 categories: ["tech"]
 tags: ["技术"]

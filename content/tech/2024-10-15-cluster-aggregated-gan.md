@@ -1,6 +1,7 @@
 ---
 title: "Cluster Aggregated GAN (CAG): A Cluster-Based Model for Appliance-Level Load Pattern Generation"
 date: 2024-10-15T10:00:00+09:00
+slug: "cluster-aggregated-gan"
 draft: false
 categories: ["tech"]
 tags: ["GAN", "NILM", "Synthetic Data", "Energy Analytics"]

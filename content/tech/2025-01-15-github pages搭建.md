@@ -1,6 +1,7 @@
 ---
 title: "github pages搭建"
 date: 2025-01-15T09:21:42Z
+slug: "github-pages搭建"
 draft: false
 categories: ["tech"]
 tags: ["技术", "GitHub", "静态网站", "博客"]

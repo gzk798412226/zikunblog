@@ -1,6 +1,7 @@
 ---
 title: "cascading vs sliding windows"
 date: 2022-01-07T14:30:45Z
+slug: "cascading-vs-sliding-windows"
 draft: false
 categories: ["tech"]
 tags: ["技术"]

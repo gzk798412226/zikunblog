@@ -1,6 +1,7 @@
 ---
 title: "搭建一个minecraft服务器"
 date: 2022-01-15T09:21:42Z
+slug: "搭建一个minecraft服务器"
 draft: false
 categories: ["tech"]
 tags: ["技术"]

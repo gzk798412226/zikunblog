@@ -1,6 +1,7 @@
 ---
 title: "GitHub + Cloudflare Pages = 无延迟的静态网页部署工具链"
 date: 2025-11-05T00:05:03+09:00
+slug: "github-pages-迁移到-cloudflare-pages"
 draft: false
 categories: ["tech"]
 tags: ["技术"]
