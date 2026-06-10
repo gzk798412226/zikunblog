@@ -1,0 +1,48 @@
+{{ define "main" }}
+<main class="main list" id="main">
+    <div class="main-inner">
+        <article class="content post h-entry">
+            <h1 class="post-title p-name">{{ .Title }}</h1>
+            {{ with .Content }}<div class="post-body e-content">{{ . }}</div>{{ end }}
+            <div class="game-cards">
+                {{ range .Pages.ByWeight }}
+                <a class="game-card" href="{{ .RelPermalink }}">
+                    <span class="game-card-icon">{{ .Params.icon | default "🎮" }}</span>
+                    <span class="game-card-body">
+                        <span class="game-card-title">{{ .Title }}</span>
+                        {{ with .Params.subtitle }}<span class="game-card-desc">{{ . }}</span>{{ end }}
+                    </span>
+                </a>
+                {{ end }}
+            </div>
+        </article>
+    </div>
+</main>
+<style>
+    .game-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+        margin-top: 1.4rem;
+    }
+    .game-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        border-radius: 10px;
+        background: rgba(128, 128, 128, .08);
+        box-shadow: 0 0 0 1px rgba(128, 128, 128, .15) inset;
+        text-decoration: none !important;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .game-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 0 1px rgba(128, 128, 128, .35) inset, 0 6px 18px rgba(0, 0, 0, .18);
+    }
+    .game-card-icon { font-size: 34px; line-height: 1; flex: none; }
+    .game-card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .game-card-title { font-weight: 600; font-size: 1.05rem; }
+    .game-card-desc { font-size: .85rem; opacity: .7; }
+</style>
+{{ end }}

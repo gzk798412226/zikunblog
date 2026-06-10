@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>暴力摩托</title>
+<style>
+  html,body{margin:0;height:100%;background:#16161a;color:#e8e8ea;
+    font-family:system-ui,-apple-system,"PingFang SC","Microsoft Yahei",sans-serif;
+    overflow:hidden;-webkit-user-select:none;user-select:none}
+  #wrap{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-sizing:border-box;padding:8px}
+  #hud{display:flex;gap:16px;align-items:center;font-size:13px;letter-spacing:.5px}
+  #hud b{color:#f0c674}
+  #stage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+  #board{position:relative;touch-action:none}
+  canvas{display:block;border-radius:10px;box-shadow:0 0 0 1px #2c2c34 inset;background:#1d3a1d}
+  #overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+    background:rgba(16,16,22,.74);border-radius:10px;text-align:center;padding:16px;box-sizing:border-box}
+  #overlay.hide{display:none}
+  button{font:inherit;color:#16161a;background:#f0c674;border:0;border-radius:8px;padding:9px 20px;cursor:pointer;font-weight:600}
+  .tip{font-size:13px;color:#9a9aa2;line-height:1.7}
+  #title{font-size:20px;font-weight:700}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud"><span>里程 <b id="dist">0</b> m</span><span>时速 <b id="spd">0</b></span><span>最佳 <b id="best">0</b> m</span></div>
+  <div id="stage"><div id="board">
+    <canvas id="cv"></canvas>
+    <div id="overlay">
+      <div id="title">暴力摩托</div>
+      <div class="tip">← / → 转向 · ↑ 加速 · ↓ 刹车<br>手机滑动转向，自动加速<br>别撞上前车！</div>
+      <button id="start">开始</button>
+    </div>
+  </div></div>
+</div>
+<script>
+  const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+  const board = document.getElementById('board'), overlay = document.getElementById('overlay');
+  const distEl = document.getElementById('dist'), spdEl = document.getElementById('spd'), bestEl = document.getElementById('best');
+  const titleEl = document.getElementById('title'), tipEl = overlay.querySelector('.tip'), startBtn = document.getElementById('start');
+  let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let running = false, raf = 0, last = 0;
+  let dist, speed, scroll, px, targetPx, cars, spawnT, best = +(localStorage.getItem('moto_best') || 0);
+  const ROAD = 0.78;              // 路面占画面宽度比例
+  const LANES = 4;
+  const keys = {};
+  bestEl.textContent = best;
+
+  function fit() {
+    const avail = Math.min(board.parentElement.clientWidth, board.parentElement.clientHeight) - 8;
+    const wCss = Math.max(220, Math.min(440, avail * 0.78));
+    const hCss = Math.max(300, avail);
+    cv.style.width = wCss + 'px'; cv.style.height = hCss + 'px';
+    cv.width = Math.round(wCss * dpr); cv.height = Math.round(hCss * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = wCss; H = hCss;
+    if (!running) draw();
+  }
+  function roadX() { return { l: W * (1 - ROAD) / 2, r: W - W * (1 - ROAD) / 2, w: W * ROAD }; }
+  function laneCenter(i) { const r = roadX(); return r.l + r.w * (i + 0.5) / LANES; }
+
+  function reset() {
+    dist = 0; speed = 240; scroll = 0; cars = []; spawnT = 0;
+    px = laneCenter(1); targetPx = px;
+  }
+  function spawnCar() {
+    const r = roadX();
+    const lane = (Math.random() * LANES) | 0;
+    const cw = r.w / LANES * 0.62;
+    cars.push({ x: laneCenter(lane), y: -80, w: cw, h: cw * 1.7, v: 90 + Math.random() * 70,
+      color: ['#5b8def','#e85d75','#f0c674','#7cd97c','#b18cf0'][(Math.random()*5)|0] });
+  }
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+  function update(dt) {
+    // 转向
+    if (keys.left) targetPx -= 360 * dt;
+    if (keys.right) targetPx += 360 * dt;
+    const r = roadX(), m = 14;
+    targetPx = Math.max(r.l + m, Math.min(r.r - m, targetPx));
+    px += (targetPx - px) * Math.min(1, dt * 12);
+    // 加减速
+    if (keys.up) speed += 160 * dt;
+    else if (keys.down) speed -= 260 * dt;
+    else speed += 24 * dt;                       // 自动缓加速
+    speed = Math.max(120, Math.min(620, speed));
+    dist += speed * dt;
+    scroll = (scroll + speed * dt) % 80;
+    // 车流
+    spawnT -= dt;
+    const interval = Math.max(0.45, 1.4 - dist / 4000);
+    if (spawnT <= 0) { spawnCar(); spawnT = interval; }
+    const py = H * 0.82;
+    for (const c of cars) {
+      c.y += (speed - c.v) * dt;                 // 相对速度：超车
+      // 碰撞 (AABB)
+      if (Math.abs(c.x - px) < (c.w + 26) / 2 && Math.abs(c.y - py) < (c.h + 44) / 2) { crash(); return; }
+    }
+    cars = cars.filter(c => c.y < H + 120);
+  }
+
+  function draw() {
+    const r = roadX(), py = H * 0.82;
+    // 草地
+    ctx.fillStyle = '#1d3a1d'; ctx.fillRect(0, 0, W, H);
+    // 路面
+    ctx.fillStyle = '#33343a'; ctx.fillRect(r.l, 0, r.w, H);
+    // 路肩红白条
+    for (let y = -((scroll * 0.9) % 40); y < H; y += 40) {
+      ctx.fillStyle = (Math.floor((y + scroll) / 40) % 2) ? '#e85d5d' : '#f2f2f2';
+      ctx.fillRect(r.l - 7, y, 7, 20); ctx.fillRect(r.r, y, 7, 20);
+    }
+    // 车道虚线
+    ctx.fillStyle = 'rgba(255,255,255,.6)';
+    for (let i = 1; i < LANES; i++) {
+      const x = r.l + r.w * i / LANES;
+      for (let y = -((scroll) % 60); y < H; y += 60) ctx.fillRect(x - 2, y, 4, 32);
+    }
+    // 敌车
+    for (const c of cars) drawCar(c);
+    // 玩家摩托
+    drawMoto(px, py);
+  }
+  function drawCar(c) {
+    const x = c.x - c.w / 2, y = c.y - c.h / 2;
+    ctx.fillStyle = 'rgba(0,0,0,.25)'; rr(x + 3, y + 5, c.w, c.h, 7); ctx.fill();
+    ctx.fillStyle = c.color; rr(x, y, c.w, c.h, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    rr(x + c.w*0.16, y + c.h*0.12, c.w*0.68, c.h*0.22, 4); ctx.fill();
+    rr(x + c.w*0.16, y + c.h*0.62, c.w*0.68, c.h*0.24, 4); ctx.fill();
+  }
+  function drawMoto(x, y) {
+    ctx.save(); ctx.translate(x, y);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(0, 26, 16, 7, 0, 0, 7); ctx.fill();
+    // 轮
+    ctx.fillStyle = '#15151a'; rr(-6, -24, 12, 14, 4); ctx.fill(); rr(-7, 12, 14, 16, 5); ctx.fill();
+    // 车身
+    ctx.fillStyle = '#e23b3b'; rr(-9, -14, 18, 30, 6); ctx.fill();
+    // 骑手
+    ctx.fillStyle = '#2b2b33'; rr(-8, -8, 16, 20, 6); ctx.fill();
+    ctx.fillStyle = '#f0c674'; ctx.beginPath(); ctx.arc(0, -16, 7, 0, 7); ctx.fill(); // 头盔
+    ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.beginPath(); ctx.arc(0, -17, 3.4, 0, 7); ctx.fill();
+    ctx.restore();
+  }
+
+  function loop(t) {
+    if (!running) return;
+    const dt = Math.min(0.05, (t - last) / 1000 || 0); last = t;
+    update(dt); if (!running) return;
+    draw();
+    distEl.textContent = dist | 0; spdEl.textContent = (speed * 0.45) | 0;
+    raf = requestAnimationFrame(loop);
+  }
+  function start() {
+    reset(); overlay.classList.add('hide'); running = true; last = performance.now();
+    cancelAnimationFrame(raf); raf = requestAnimationFrame(loop);
+  }
+  function crash() {
+    running = false; cancelAnimationFrame(raf);
+    if ((dist | 0) > best) { best = dist | 0; localStorage.setItem('moto_best', best); bestEl.textContent = best; }
+    titleEl.textContent = '💥 撞车了';
+    tipEl.innerHTML = '里程 ' + (dist | 0) + ' m · 最佳 ' + best + ' m';
+    startBtn.textContent = '再来一次';
+    overlay.classList.remove('hide');
+  }
+
+  addEventListener('keydown', e => {
+    const k = e.key.toLowerCase(); let h = true;
+    if (k === 'arrowleft' || k === 'a') keys.left = true;
+    else if (k === 'arrowright' || k === 'd') keys.right = true;
+    else if (k === 'arrowup' || k === 'w') keys.up = true;
+    else if (k === 'arrowdown' || k === 's') keys.down = true;
+    else if (k === ' ' && !running) start();
+    else h = false;
+    if (h) e.preventDefault();
+  });
+  addEventListener('keyup', e => {
+    const k = e.key.toLowerCase();
+    if (k === 'arrowleft' || k === 'a') keys.left = false;
+    else if (k === 'arrowright' || k === 'd') keys.right = false;
+    else if (k === 'arrowup' || k === 'w') keys.up = false;
+    else if (k === 'arrowdown' || k === 's') keys.down = false;
+  });
+  // 触屏：拖动转向，自动加速
+  board.addEventListener('touchstart', e => { if (!running) return; steer(e.touches[0]); e.preventDefault(); }, { passive: false });
+  board.addEventListener('touchmove', e => { if (!running) return; steer(e.touches[0]); e.preventDefault(); }, { passive: false });
+  function steer(t) {
+    const rect = cv.getBoundingClientRect();
+    targetPx = (t.clientX - rect.left) / rect.width * W;
+  }
+  startBtn.addEventListener('click', start);
+  addEventListener('resize', fit);
+  reset(); fit();
+</script>
+</body>
+</html>
