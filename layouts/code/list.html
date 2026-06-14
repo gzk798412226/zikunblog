@@ -1,0 +1,219 @@
+{{ define "main" }}
+<main class="main single" id="main">
+    <div class="main-inner">
+        <article class="content post h-entry">
+            <h1 class="post-title p-name">{{ .Title }}</h1>
+            {{ with .Content }}<div class="post-body e-content">{{ . }}</div>{{ end }}
+
+            <div class="py-playground">
+                <div class="py-toolbar">
+                    <button type="button" class="py-run" id="pyRun">▶ 运行</button>
+                    <button type="button" class="py-reset" id="pyReset" title="清空，从头开始写">↺ 清空</button>
+                    <span class="py-mem" id="pyMem" title="Python 运行时当前占用的内存（WASM 线性内存）">内存：—</span>
+                    <span class="py-status" id="pyStatus">点「运行」会先加载 Python（约几秒）</span>
+                </div>
+
+                <textarea class="py-editor" id="pyEditor" spellcheck="false" autocomplete="off" autocapitalize="off">{{ .Params.code }}</textarea>
+
+                <div class="py-console-label">输出</div>
+                <pre class="py-console" id="pyConsole"><span class="py-dim">（运行后这里会显示结果）</span></pre>
+            </div>
+        </article>
+    </div>
+</main>
+
+<style>
+    .py-playground {
+        margin: 1.4rem 0 .6rem;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(128, 128, 128, .18) inset;
+    }
+    .py-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 10px 12px;
+        background: rgba(128, 128, 128, .10);
+    }
+    .py-run, .py-reset {
+        border: 0;
+        border-radius: 6px;
+        padding: 7px 14px;
+        font-size: .92rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: #fff;
+        background: #2f9e44;
+        transition: opacity .15s, background .15s;
+    }
+    .py-reset { background: #868e96; padding: 7px 12px; }
+    .py-run:hover { background: #2b8a3e; }
+    .py-reset:hover { background: #6c757d; }
+    .py-run:disabled { opacity: .5; cursor: progress; }
+    .py-mem {
+        font-family: var(--code-font, monospace);
+        font-size: .8rem;
+        padding: 4px 8px;
+        border-radius: 5px;
+        background: rgba(128, 128, 128, .15);
+        white-space: nowrap;
+    }
+    .py-status { font-size: .8rem; opacity: .7; margin-left: auto; }
+    .py-editor {
+        display: block;
+        width: 100%;
+        min-height: 160px;
+        box-sizing: border-box;
+        margin: 0;
+        padding: 14px 16px;
+        border: 0;
+        resize: none;
+        overflow: hidden;
+        font-family: var(--code-font, "Source Code Pro", monospace);
+        font-size: .92rem;
+        line-height: 1.55;
+        tab-size: 4;
+        color: #e6e6e6;
+        background: #1c1c20;
+        outline: none;
+    }
+    .py-console-label {
+        padding: 6px 14px;
+        font-size: .75rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        opacity: .6;
+        background: rgba(128, 128, 128, .10);
+    }
+    .py-console {
+        margin: 0;
+        padding: 14px 16px;
+        min-height: 70px;
+        overflow: visible;
+        font-family: var(--code-font, "Source Code Pro", monospace);
+        font-size: .9rem;
+        line-height: 1.5;
+        color: #d4d4d4;
+        background: #16161a;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .py-console .py-dim { opacity: .45; }
+    .py-console .py-err { color: #ff8787; }
+</style>
+
+<script>
+(function () {
+    var PYODIDE_VERSION = "v0.26.2";
+    var editor  = document.getElementById("pyEditor");
+    var runBtn  = document.getElementById("pyRun");
+    var resetBtn= document.getElementById("pyReset");
+    var consoleEl = document.getElementById("pyConsole");
+    var statusEl  = document.getElementById("pyStatus");
+    var memEl   = document.getElementById("pyMem");
+    var original = editor.value;
+
+    var pyodide = null;
+    var loading = null;
+
+    // 让编辑器高度随内容自动伸展：写几行就多长，不出滚动条
+    function autoGrow() {
+        editor.style.height = "auto";
+        editor.style.height = editor.scrollHeight + "px";
+    }
+    editor.addEventListener("input", autoGrow);
+    window.addEventListener("load", autoGrow);
+    autoGrow();
+
+    function setStatus(t) { statusEl.textContent = t; }
+
+    function fmtBytes(b) {
+        if (!b && b !== 0) return "—";
+        var mb = b / (1024 * 1024);
+        return mb.toFixed(1) + " MB";
+    }
+    function updateMem() {
+        if (!pyodide) return;
+        try {
+            var bytes = pyodide._module.HEAPU8.buffer.byteLength;
+            memEl.textContent = "内存：" + fmtBytes(bytes);
+        } catch (e) { /* ignore */ }
+    }
+
+    function loadScript(src) {
+        return new Promise(function (resolve, reject) {
+            var s = document.createElement("script");
+            s.src = src; s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+
+    function ensurePyodide() {
+        if (pyodide) return Promise.resolve(pyodide);
+        if (loading) return loading;
+        setStatus("正在加载 Python 运行时…");
+        var base = "https://cdn.jsdelivr.net/pyodide/" + PYODIDE_VERSION + "/full/";
+        loading = loadScript(base + "pyodide.js")
+            .then(function () { return loadPyodide({ indexURL: base }); })
+            .then(function (py) {
+                pyodide = py;
+                py.setStdout({ batched: function (s) { write(s + "\n"); } });
+                py.setStderr({ batched: function (s) { write(s + "\n", true); } });
+                setStatus("Python 已就绪");
+                updateMem();
+                setInterval(updateMem, 1500);
+                return py;
+            });
+        return loading;
+    }
+
+    function write(text, isErr) {
+        var span = document.createElement("span");
+        if (isErr) span.className = "py-err";
+        span.textContent = text;
+        consoleEl.appendChild(span);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function run() {
+        runBtn.disabled = true;
+        consoleEl.innerHTML = "";
+        ensurePyodide().then(function (py) {
+            setStatus("运行中…");
+            return py.runPythonAsync(editor.value);
+        }).then(function () {
+            setStatus("运行完成");
+        }).catch(function (err) {
+            write(String(err.message || err), true);
+            setStatus("出错了");
+        }).finally(function () {
+            runBtn.disabled = false;
+            updateMem();
+        });
+    }
+
+    runBtn.addEventListener("click", run);
+    resetBtn.addEventListener("click", function () {
+        editor.value = "";
+        consoleEl.innerHTML = '<span class="py-dim">（已清空）</span>';
+        autoGrow();
+        editor.focus();
+    });
+
+    // Tab 键插入缩进而不是跳出编辑框
+    editor.addEventListener("keydown", function (e) {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            var s = this.selectionStart, en = this.selectionEnd;
+            this.value = this.value.slice(0, s) + "    " + this.value.slice(en);
+            this.selectionStart = this.selectionEnd = s + 4;
+            autoGrow();
+        }
+        // Ctrl/Cmd + Enter 运行
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); }
+    });
+})();
+</script>
+{{ end }}

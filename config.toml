@@ -9,7 +9,7 @@ googleAnalytics = "G-XXXXXXXXXX"  # 这里需要替换为你的GA4测量ID
 
 baseURL = "https://zikunblog.pages.dev/"
 title = "Blog"
-languageCode = "zh-CN"
+locale = "zh-CN"
 hasCJKLanguage = true
 # 版权信息（支持 Markdown）
 copyright = "© 2025 Zikun Guo. All rights reserved."
@@ -199,6 +199,12 @@ uglyURLs = false
     #     weight = 1
     #     pre = "internal"
     #     post = "home"
+    [[menu.main]]
+        pageref = "/code/"
+        name = "Code"
+        weight = 1
+        pre = "internal"
+        post = "code"
     [[menu.main]]
         pageref = "/play/"
         name = "Game"
@@ -1357,8 +1363,8 @@ uglyURLs = false
     # 是否开启高亮
     enableHighlight = true
 
-    # 是否开启竖直滚动
-    enableOverflowY = true
+    # 是否开启竖直滚动（false = 代码块完整展开、不限高、无滚动条）
+    enableOverflowY = false
     # 最大高度
     maxHeight = 20
     # 单位：em
