@@ -5,19 +5,25 @@ draft: false
 ---
 
 
-你好，我是Zikun，欢迎你来到我的网站。我的主要研究方向是VLM,Attention优化,演化学习。同时正在与李老师在合作一项的联合情感演化（Co-evolution）项目。
+你好，我是Zikun，欢迎你来到我的网站。我的主要研究方向是Ms Lee, VLM,Attention优化,演化学习。
 
-![alt text](</images/9e78bcee33c210a8e565b103aaa86c11.jpg> )
-![alt text](</images/6c1ac54b725f5f481fbc67e5091e99a9.jpg> )
-![alt text](</images/135e3ee8a67ff59fbbda1ff15746e5f5.jpg> )
-
-本站使用[Github](https://github.com/)持续更新，使用[hugo](https://gohugo.io/)搭建，部署在[GitHub Pages](https://docs.github.com/en/pages)上，
+本站使用[Github](https://github.com/)持续更新，使用[hugo](https://gohugo.io/)搭建，部署在[Cloudflare Pages](https://pages.cloudflare.com/)上，
 主题为[MemE](https://github.com/reuixiy/hugo-theme-meme.git)，
 秉承着互联网的开源精神，[点击这里可以访问本站源码](https://github.com/gzk798412226/zikunblog.git)。
 如果您发现了网站的任何错误、bug、亦或有任何意见建议的话，欢迎联系：gzk798412226@gmail.com 或直接
 [点击这里提交issues](https://github.com/gzk798412226/zikunblog.pages.dev/issues)。
 
+
 Best Regards
+
+
+![alt text](</images/6c1ac54b725f5f481fbc67e5091e99a9.jpg> )
+![alt text](</images/9e78bcee33c210a8e565b103aaa86c11.jpg> )
+
+![alt text](</images/135e3ee8a67ff59fbbda1ff15746e5f5.jpg> )
+
+
+
 
 
 {{< youtube K9_VFxzCuQ0 >}}
