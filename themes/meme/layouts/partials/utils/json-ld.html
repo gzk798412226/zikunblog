@@ -61,7 +61,7 @@
         "url": {{ $.Permalink }},
         "headline": {{ $rawTitle }},
         "description": {{ $description }},
-        "inLanguage" : "{{ $.Site.Language.Locale }}",
+        "inLanguage" : "{{ $.Site.LanguageCode }}",
         "articleSection": {{ $.Section }},
         "wordCount": {{ $.WordCount }},
         {{ with $images -}}
